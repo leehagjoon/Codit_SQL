@@ -43,6 +43,23 @@ WHERE u.id = 4
 ORDER BY h.played_at DESC LIMIT 20
 ;
 
+-- 강사님 쿼리
+SELECT h.played_at
+	, h.user_id
+    , u.username
+    , h.song_id
+    , s.title AS song_title
+    , s.duration_seconds
+FROM history h
+INNER JOIN users u ON h.user_id = u.id
+INNER JOIN songs s ON h.song_id = s.id
+WHERE h.user_id = 1
+ORDER BY h.played_at DESC
+LIMIT 20
+;
+
+
+
 -- 파트2. 2024년의 음악
 
 /* 음악계에는 매년 다양한 일들이 벌어집니다. 기대를 모았던 아티스트가 새 앨범을 발표하기도 하고, 예상치 못한 신인이 차트를 휩쓸기도 하죠. 2024년의 음악 데이터를 분석해, 
@@ -62,11 +79,24 @@ WHERE YEAR(a.release_date) = 2024
 ORDER BY a.release_date DESC, a.id ASC
 ;
 
+-- 강사님 쿼리
+
+SELECT al.id AS album_id
+	, al.title AS album_title
+    , al.release_date
+    , ar.name AS artist_name
+FROM albums al
+INNER JOIN artists ar ON al.artist_id = ar.id
+WHERE al.release_date >= '2024-01-01'
+	AND al.release_date < '2025-01-01'
+ORDER BY al.release_date, al.id
+;
+
 /* 2-2. 2024년에 앨범을 발매한 아티스트의 목록을 앨범을 많이 발매한 순서대로 확인해 보세요. 
 (아티스트 ID, 아티스트 이름, 발매한 앨범의 수를 조회하고, 앨범의 수가 많은 것부터 정렬하되 앨범의 수가 같을 경우 아티스트의 이름 순으로 정렬하세요.)
 */
 
-SELECT a.id
+SELECT alb.artist_id
 	, a.name
 	, COUNT(alb.id) AS alb_count
 FROM artists a
@@ -77,17 +107,45 @@ GROUP BY a.id , a.name
 ORDER BY alb_count DESC, a.name ASC
 ;
 
+-- 강사님 쿼리
+
+SELECT al.artist_id
+	, ar.name
+    , COUNT(al.id) AS albums_count
+FROM albums al
+INNER JOIN artists ar ON al.artist_id = ar.id
+WHERE al.release_date >= '2024-01-01'
+	AND al.release_date < '2025-01-01'
+GROUP BY al.artist_id, ar.name
+ORDER BY COUNT(al.id) DESC, ar.name
+;
+
+
 -- 2-3. 2024년에 가장 많이 재생된 20곡을 많이 재생된 순서대로 확인해 보세요. (곡의 ID, 곡 제목, 재생 수를 조회하고, 재생 수가 같을 경우 곡 제목 순으로 정렬하세요.)
 
 SELECT s.id
 	, s.title
-	, COUNT(h.song_id) AS h_count
+	, COUNT(h.id) AS h_count
 FROM songs s
 	LEFT JOIN history h
 		ON s.id = h.song_id
 WHERE YEAR(h.played_at) = 2024
 GROUP BY s.id, s.title
 ORDER BY h_count DESC, s.title ASC
+LIMIT 20
+;
+
+-- 강사님 쿼리
+
+SELECT h.song_id
+	, s.title AS song_title
+    , COUNT(h.id) AS played_count
+FROM history h
+INNER JOIN songs s ON h.song_id = s.id
+WHERE h.played_at >= '2024-01-01'
+	AND h.played_at < '2025-01-01'
+GROUP BY h.song_id, s.title
+ORDER BY COUNT(h.id) DESC, s.title
 LIMIT 20
 ;
 
@@ -107,6 +165,23 @@ WHERE YEAR(h.played_at) = 2024
 GROUP BY a.id, a.name
 ORDER BY play_count DESC, a.name ASC
 LIMIT 20;
+
+-- 강사님 쿼리
+
+SELECT al.artist_id
+	, ar.name AS artist_name
+    , COUNT(h.id) AS played_count
+FROM history h
+INNER JOIN songs s ON h.song_id = s.id
+INNER JOIN albums al ON s.album_id = al.id
+INNER JOIN artists ar ON al.artist_id = ar.id
+WHERE h.played_at >= '2024-01-01'
+	AND h.played_at < '2025-01-01'
+GROUP BY al.artist_id, ar.name
+ORDER BY COUNT(h.id) DESC, ar.name
+LIMIT 20
+;
+
 
 -- 파트3. 내가 2024년에 들은 음악
 
@@ -135,6 +210,27 @@ FROM users u
 WHERE u.id = 4 AND YEAR(h.played_at) = 2024
 ORDER BY h.played_at DESC
 LIMIT 100;
+
+
+-- 강사님 쿼리
+
+SELECT h.user_id
+	, u.username
+    , h.played_at
+    , s.title AS song_title
+    , al.title AS album_title
+    , ar.name AS artist_name
+FROM history h
+INNER JOIN users u ON h.user_id = u.id
+INNER JOIN songs s ON h.song_id = s.id
+INNER JOIN albums al ON s.album_id = al.id
+INNER JOIN artists ar ON al.artist_id = ar.id
+WHERE h.played_at >= '2024-01-01'
+	AND h.played_at < '2025-01-01'
+    AND h.user_id = 1
+ORDER BY h.played_at DESC
+LIMIT 100
+;
 		
 -- 3-2. 특정 사용자가 2024년에 많이 들은 20곡을 많이 들은 순서대로 확인해 보세요. (곡의 ID, 곡 제목, 재생 수를 조회하시오. 재생 수가 같은 경우 곡 제목 순으로 정렬하세요.)
 
@@ -149,7 +245,24 @@ FROM users u
 WHERE u.id = 5 AND YEAR(h.played_at) = 2024
 GROUP BY s.id, s.title
 ORDER BY song_count DESC, s.title ASC
+LIMIT 20
 ;
+
+-- 강사님 쿼리
+
+SELECT h.song_id
+	, s.title AS song_title
+    , COUNT(h.id) AS played_count
+FROM history h
+INNER JOIN songs s ON h.song_id = s.id
+WHERE h.played_at >= '2024-01-01'
+	AND h.played_at < '2025-01-01'
+    AND h.user_id = 1
+GROUP BY h.song_id, s.title
+ORDER BY COUNT(h.id) DESC, s.title
+LIMIT 20
+;
+
 
 -- 3-3. 특정 사용자가 2024년에 많이 들은 20명의 아티스트를 많이 들은 순서대로 확인해 보세요. (아티스트의 ID, 아티스트 이름, 재생 수를 조회하고, 재생 수가 같은 경우 아티스트의 이름 순으로 정렬하세요.)
 
@@ -171,6 +284,23 @@ ORDER BY play_count DESC, art.name ASC
 LIMIT 20
 ;
 
+-- 강사님 쿼리
+
+SELECT ar.id AS artist_id
+	, ar.name AS artist_name
+    , COUNT(h.id) AS played_count
+FROM history h
+INNER JOIN songs s ON h.song_id = s.id
+INNER JOIN albums al ON s.album_id = al.id
+INNER JOIN artists ar ON al.artist_id = ar.id
+WHERE h.played_at >= '2024-01-01'
+	AND h.played_at < '2025-01-01'
+    AND h.user_id = 1
+GROUP BY ar.id, ar.name
+ORDER BY COUNT(h.id) DESC, ar.name
+LIMIT 20
+;
+
 -- 3-4. 특정 사용자의 2024년 월별 음악 감상 횟수를 확인해 보세요.
 
 SELECT MONTH(h.played_at) AS month
@@ -183,6 +313,18 @@ GROUP BY MONTH(h.played_at)
 ORDER BY month ASC
 ;
 
+-- 강사님 쿼리
+
+SELECT MONTH(played_at) AS played_month
+	, COUNT(id) AS played_count
+FROM history
+WHERE user_id = 1
+	AND played_at >= '2024-01-01'
+    AND played_at < '2025-01-01'
+GROUP BY MONTH(played_at)
+ORDER BY MONTH(played_at)
+;
+
 -- 3-5. 특정 사용자가 2024년 재생한 곡들의 총 재생 시간을 확인해 보세요.
 SELECT u.id AS user_id
      , u.username
@@ -192,9 +334,20 @@ FROM users u
 		ON u.id = h.user_id
 	LEFT JOIN songs s 
 		ON h.song_id = s.id
-WHERE u.id = 7 AND YEAR(h.played_at) = 2024
+WHERE u.id = 1 AND YEAR(h.played_at) = 2024
 GROUP BY u.id, u.username
 ;
+
+-- 강사님 쿼리
+
+SELECT SUM(duration_seconds) AS total_duration_seconds
+FROM history h
+INNER JOIN songs s ON h.song_id = s.id
+WHERE user_id = 1
+	AND played_at >= '2024-01-01'
+    AND played_at < '2025-01-01'
+;
+
 -- 3-6. 특정 사용자가 2024년에 새롭게 발견한 아티스트 목록을 확인해 보세요. 
 SELECT art.id
 	, art.name
@@ -219,6 +372,19 @@ FROM artists art
 WHERE h.user_id = 6 AND YEAR(h.played_at) < 2024
 ;
 
+-- 강사님 코드
+SELECT ar.id
+	, ar.name
+FROM history h
+INNER JOIN songs s ON h.song_id = s.id
+INNER JOIN albums al ON s.album_id = al.id
+INNER JOIN artists ar ON al.artist_id = ar.id
+WHERE h.user_id = 1
+GROUP BY ar.id, ar.name
+HAVING MIN(h.played_at) >= '2024-01-01'
+	AND MIN(h.played_at) < '2025-01-01'
+ORDER BY ar.name
+;
 -- 파트4. 나의 음악 감상 패턴 발견하기
 
 /*이제 기본적인 음악 감상 정보를 넘어, 더 깊이 있는 패턴을 살펴볼 차례입니다. 
@@ -242,9 +408,28 @@ WITH UserPlayCounts AS (
 )
 SELECT user_id, 
        play_count, 
-       ROUND(rank_percent * 100, 2) AS top_percentile
+       ROUND(rank_percent, 2) AS top_percentile
 FROM UserPlayCounts
 WHERE user_id = 6;
+
+
+-- 강사님 쿼리
+
+WITH artist_listens AS (
+	SELECT h.user_id
+		, COUNT(h.id) AS played_count
+		, PERCENT_RANK() OVER(ORDER BY COUNT(h.id) DESC) AS pct_rnk
+	FROM history h
+	INNER JOIN songs s ON h.song_id = s.id
+	INNER JOIN albums al ON s.album_id = al.id
+	WHERE h.played_at >= '2024-01-01'
+		AND h.played_at < '2025-01-01'
+		AND al.artist_id = 20
+	GROUP BY h.user_id)
+SELECT *
+FROM artist_listens
+WHERE user_id = 1
+;
 
 -- 4-2. 특정 사용자가 들은 곡 중 다른 사용자들은 많이 듣지 않는 곡을 찾아보세요. (특정 사용자의 감상 횟수와 전체 사용자들의 평균 감상 횟수를 비교)
 
@@ -252,7 +437,7 @@ WITH UserSongCounts AS (
     SELECT song_id
     	, COUNT(id) AS user_count
     FROM history
-    WHERE user_id = 6
+    WHERE user_id = 1
     GROUP BY song_id
 ),
 AvgSongCounts AS (
@@ -271,6 +456,37 @@ FROM UserSongCounts usc
 		ON usc.song_id = s.id
 WHERE usc.user_count > ascnt.avg_count
 ORDER BY (usc.user_count - ascnt.avg_count) DESC;
+
+
+-- 강사님 코드
+WITH single_history AS (
+SELECT song_id
+	, COUNT(id) AS one_played_count
+FROM history
+WHERE user_id = 1
+GROUP BY song_id
+),
+others_history AS (
+SELECT song_id
+	, AVG(other_played_count) AS avg_played_count
+FROM (
+SELECT user_id
+	, song_id
+	, COUNT(id) AS other_played_count
+FROM history
+WHERE user_id != 1
+GROUP BY user_id, song_id) t
+GROUP BY song_id
+)
+SELECT sh.song_id
+	, sh.one_played_count
+	, oh.avg_played_count
+FROM single_history sh
+	LEFT JOIN others_history oh
+		ON sh.song_id = oh.song_id
+WHERE sh.one_played_count > IFNULL(oh.avg_played_count,0)
+ORDER BY sh.one_played_count - IFNULL(oh.avg_played_count,0) DESC
+;
 
 
 -- 4-3. 특정 사용자의 요일별 음악 재생 비율을 확인해 보세요.
@@ -293,6 +509,27 @@ SELECT day_of_week
 FROM UserWeeklyPlay uwp, TotalPlay t
 ORDER BY FIELD(day_of_week, 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday');
 
+-- 강사님 쿼리
+
+SELECT DAYNAME(played_at) AS day_name
+-- 	, COUNT(id) AS played_count
+--  , SUM(COUNT(id)) OVER() AS total_played_count
+    , ROUND(COUNT(id) / SUM(COUNT(id)) OVER() * 100, 1) AS played_ratio
+FROM history
+WHERE user_id = 1
+GROUP BY DAYNAME(played_at)
+ORDER BY FIELD(day_name
+				, 'Monday'
+				, 'Tuesday'
+				, 'Wednesday'
+				, 'Thursday'
+				, 'Friday'
+				, 'Saturday'
+				, 'Sunday')
+;
+
+
+
 -- 4-4. 특정 사용자의 시간대별 음악 재생 비율을 확인해 보세요.
 
 WITH UserHourlyPlay AS (
@@ -313,3 +550,21 @@ SELECT play_hour
 FROM UserHourlyPlay uhp, TotalPlay t
 ORDER BY play_hour ASC;
 
+-- 강사님 쿼리
+
+SELECT CASE WHEN HOUR(played_at) BETWEEN 6 AND 11 THEN 'morning'
+		WHEN HOUR(played_at) BETWEEN 12 AND 17 THEN 'afternoon'
+        WHEN HOUR(played_at) BETWEEN 18 AND 23 THEN 'evening'
+        ELSE 'night' END AS time_period
+-- 	, COUNT(id) AS played_count
+--  , SUM(COUNT(id)) OVER() AS total_played_count
+    , ROUND(COUNT(id) / SUM(COUNT(id)) OVER() * 100, 1) AS played_ratio
+FROM history
+WHERE user_id = 1
+GROUP BY time_period
+ORDER BY FIELD(time_period
+				, 'morning'
+				, 'afternoon'
+				, 'evening'
+				, 'night')
+;
