@@ -1,8 +1,7 @@
-# 🗄️ Codit SQL Bootcamp Practice
+# 🗄️ Codit Bootcamp Practice
 
-> 코드잇(Codeit) 부트캠프 SQL 실습 정리 저장소입니다.  
-> SQL 기초부터 실전 쿼리까지 문제 해결 능력을 학습합니다.
-
+> 코드잇(Codeit) 부트캠프 실습 정리 저장소입니다.  
+> 미션을 스스로 해결하며 실전 과제를 진행합니다.
 ---
 
 ## 🎯 Goal
@@ -10,7 +9,9 @@
 - SQL 기본기 + 실전 쿼리 능력 강화
 - JOIN / GROUP BY / SUBQUERY 중심 학습
 - 데이터 분석 및 코딩테스트 대비
-
+- Python 기본 + 실전
+- 데이터 시각화
+- 가설 검정 (T-검정, 회귀분석, 모비율 Z검정, 등 다양한 분석 진행)
 ---
 
 ## 📊 Topics
